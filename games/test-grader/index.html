@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Speed Grader - Teacher POV</title>
+    <style>
+        @import url('https://googleapis.com');
+        
+        :root { 
+            --ies-navy: #002F6C; 
+            --paper-white: #FCFBF7; 
+            --radius-subtle: 12px; 
+        }
+        
+        body { 
+            margin: 0; 
+            padding: 20px; 
+            background: linear-gradient(135deg, #4A3525 0%, #2C1E15 100%); 
+            font-family: 'Noto Sans', sans-serif; 
+            min-height: 100vh; 
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+        }
+        
+        /* 3D Navigation Button */
+        .back-btn { 
+            align-self: flex-start; 
+            background: var(--ies-navy); 
+            color: white; 
+            padding: 10px 20px; 
+            border-radius: var(--radius-subtle); 
+            text-decoration: none; 
+            font-weight: bold; 
+            box-shadow: 0 4px 0 #001A3D; 
+            transition: transform 0.1s;
+        }
+
+        .back-btn:active {
+            transform: translateY(4px);
+            box-shadow: none;
+        }
+
+        .desk-container { 
+            width: 100%; 
+            max-width: 600px; 
+            margin-top: 20px; 
+        }
+        
+        /* Transparent Glass HUD */
+        .desk-hud { 
+            background: rgba(255, 255, 255, 0.1); 
+            padding: 15px 30px; 
+            display: flex; 
+            justify-content: space-between; 
+            color: white; 
+            font-weight: bold; 
+            font-size: 1.2rem; 
+            margin-bottom: 25px; 
+            border-radius: var(--radius-subtle); 
+            backdrop-filter: blur(5px);
+        }
+        
+        /* Realistic Layered 3D Paper Sheet */
+        .exam-paper { 
+            background-color: var(--paper-white); 
+            padding: 40px; 
+            box-shadow: 
+                0 1px 1px rgba(0,0,0,0.15), 
+                0 6px 0 -3px #EEEADF,
+                0 12px 25px rgba(0,0,0,0.35); 
+            position: relative; 
+            border-radius: 4px; 
+        }
+        
+        /* Handwritten Student Ink style font */
+        .student-answer { 
+            font-family: 'Caveat', cursive; 
+            font-size: 1.9rem; 
+            color: #2980B9; 
+            margin: 15px 0 35px 15px; 
+            line-height: 1.3;
+        }
+        
+        /* Core Controls Row Layout */
+        .action-tray { 
+            display: grid; 
+            grid-template-columns: 1fr 1fr; 
+            gap: 15px; 
+            margin-top: 40px; 
+        }
+        
+        .btn { 
+            border: none; 
+            font-size: 1.1rem; 
+            font-weight: bold; 
+            color: white; 
+            padding: 15px; 
+            border-radius: 8px; 
+            cursor: pointer; 
+            transition: transform 0.1s;
+        }
+        
+        .btn-pass { background: #2ECC71; box-shadow: 0 5px 0 #27AE60; }
+        .btn-fail { background: #E74C3C; box-shadow: 0 5px 0 #C0392B; }
+        
+        .btn:active {
+            transform: translateY(4px);
+            box-shadow: none;
+        }
+
+        /* 3D Grading Red Ink Stamp */
+        .stamp { 
+            position: absolute; 
+            top: 35px; 
+            right: 40px; 
+            font-family: 'Caveat', cursive; 
+            font-size: 2.6rem; 
+            border: 4px dashed #E74C3C; 
+            color: #E74C3C; 
+            padding: 5px 15px; 
+            transform: rotate(14deg); 
+            border-radius: 8px; 
+            font-weight: bold; 
+        }
+        
+        .hidden { display: none; }
+    </style>
+</head>
+<body>
+
+    <a href="../../index.html" class="back-btn">⬅ Return to Desk</a>
+
+    <div class="desk-container">
+        
+        <!-- Live Parameter Tracking Displays -->
+        <div class="desk-hud">
+            <div>Papers Remaining: <span id="papers-count">4</span></div>
+            <div>School Reputation: <span id="rep-score">100%</span></div>
+        </div>
+
+        <!-- Sheet Workspace -->
+        <main class="exam-paper">
+            <div id="grade-stamp" class="stamp hidden">PASSED</div>
+            <h2>Student Exam File: <span id="student-name">Loading...</span></h2>
+            <hr style="border: 0; border-top: 1px solid #E2E8F0;">
+            
+            <p style="color:#7F8C8D; margin-top:20px;"><strong>English Diagnostic Question:</strong> Correct the grammatical error in the following phrase.</p>
+            <div class="student-answer" id="student-ans">...</div>
+            
+            <!-- Controls Tray -->
+            <div class="action-tray">
+                <button class="btn btn-pass" onclick="grade(true)">✔ Mark Correct</button>
+                <button class="btn btn-fail" onclick="grade(false)">❌ Mark Incorrect</button>
+            </div>
+        </main>
+
+    </div>
+
+    <script>
+        // Array holding randomized questions to correct
+        const papers = [
+            { name: "Hugo A. (Year 8)", ans: '"They are going to the school store tomorrow."', correct: true },
+            { name: "Emma L. (Year 8)", ans: '"Them is going to the school store tomorrow."', correct: false },
+            { name: "Liam J. (Year 8)", ans: '"They are happy with their test result scores."', correct: true },
+            { name: "Linnea B. (Year 8)", ans: '"He don\'t want to do homework during lunch break."', correct: false }
+        ];
+        
+        let index = 0; 
+        let rep = 100;
+
+        function loadPaper() {
+            if(index >= papers.length) { 
+                document.querySelector('.exam-paper').innerHTML = `
+                    <h2 style="color:var(--ies-navy); text-align:center;">All Papers Evaluated!</h2>
+                    <p style="text-align:center; color:#5A6A85;">Your final reputation score is ${rep}%. Time to check back into the staff room.</p>
+                `; 
+                return; 
+            }
+            
+            document.getElementById('student-name').innerText = papers[index].name;
+            document.getElementById('student-ans').innerText = papers[index].ans;
+            document.getElementById('papers-count').innerText = papers.length - index;
+            document.getElementById('grade-stamp').classList.add('hidden');
+        }
+
+        function grade(userPassedInput) {
+            const stamp = document.getElementById('grade-stamp');
+            
+            // Render the stamp dynamically
+            stamp.innerText = userPassedInput ? "CORRECT" : "INCORRECT";
+            stamp.classList.remove('hidden');
+
+            // Evaluate if player clicked correct judgment call
+            if (userPassedInput !== papers[index].correct) { 
+                rep -= 25; 
+                if(rep < 0) rep = 0; 
+                document.getElementById('rep-score').innerText = rep + "%"; 
+            }
+            
+            index++; 
+            setTimeout(loadPaper, 1100); // Small realistic grading delay
+        }
+
+        // Run application on start
+        loadPaper();
+    </script>
+</body>
+</html>
