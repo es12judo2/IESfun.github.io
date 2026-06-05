@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Grade Bettor Simulator</title>
+    <style>
+        @import url('https://googleapis.com');
+        
+        :root { 
+            --ies-navy: #002F6C; 
+            --ies-gold: #D4AF37; 
+            --radius-subtle: 8px; 
+        }
+        
+        body { 
+            margin: 0; 
+            padding: 0; 
+            background-color: #ECE0CD; 
+            font-family: 'Noto Sans', sans-serif; 
+            color: #2C3E50; 
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+            min-height: 100vh;
+        }
+        
+        .header-area { 
+            width: 100%; 
+            text-align: center; 
+            padding: 30px 0; 
+            background: var(--ies-navy); 
+            color: white; 
+            border-bottom: 4px solid var(--ies-gold); 
+        }
+        
+        .header-area h1 {
+            font-family: 'Lora', serif;
+            margin: 0 0 10px 0;
+        }
+
+        .back-link { 
+            color: var(--ies-gold); 
+            text-decoration: none; 
+            font-weight: bold; 
+            margin-bottom: 10px;
+            display: inline-block;
+        }
+        
+        .hud-display { 
+            background: #FFFFFF; 
+            border-radius: var(--radius-subtle); 
+            padding: 15px 40px; 
+            margin: 25px 0; 
+            font-size: 1.3rem; 
+            font-weight: bold; 
+            display: flex; 
+            gap: 40px; 
+            box-shadow: 0 4px 0 #CBD5E1; 
+        }
+        
+        /* 3D Manila Folder look */
+        .folder-container { 
+            background: #FAF4E5; 
+            width: 90%; 
+            max-width: 500px; 
+            border-radius: 12px; 
+            padding: 30px; 
+            position: relative; 
+            box-shadow: 0 6px 0 #D9C39E, 0 15px 25px rgba(0,0,0,0.15); 
+            box-sizing: border-box;
+        }
+        
+        .profile-row { 
+            display: flex; 
+            gap: 20px; 
+            align-items: center; 
+            margin-bottom: 25px; 
+        }
+        
+        .avatar-box { 
+            font-size: 4.5rem; 
+            background: white; 
+            padding: 10px; 
+            border-radius: var(--radius-subtle); 
+            border: 1px solid #E2E8F0; 
+        }
+        
+        .student-meta h2 { 
+            margin: 0; 
+            font-family: 'Lora', serif; 
+            color: var(--ies-navy); 
+        }
+        
+        .dossier-data { 
+            background: white; 
+            padding: 20px; 
+            border-radius: var(--radius-subtle); 
+            border: 1px solid #E2E8F0; 
+            margin-bottom: 30px; 
+        }
+        
+        .data-line { 
+            margin-bottom: 12px; 
+            font-size: 1.05rem; 
+        }
+        
+        .label { font-weight: bold; color: #7F8C8D; }
+        .value { font-weight: bold; color: #2C3E50; }
+        
+        .bet-tray { 
+            display: grid; 
+            grid-template-columns: repeat(3, 1fr); 
+            gap: 15px; 
+        }
+        
+        .btn-bet { 
+            border: none; 
+            padding: 15px; 
+            font-size: 1.2rem; 
+            font-weight: bold; 
+            color: white; 
+            border-radius: 6px; 
+            cursor: pointer; 
+            transition: transform 0.1s;
+        }
+        
+        .btn-a { background-color: #2ECC71; box-shadow: 0 4px 0 #27AE60; }
+        .btn-c { background-color: #3498DB; box-shadow: 0 4px 0 #2980B9; }
+        .btn-f { background-color: #E74C3C; box-shadow: 0 4px 0 #C0392B; }
+        
+        .btn-bet:active {
+            transform: translateY(3px);
+            box-shadow: none;
+        }
+
+        .result-flash { 
+            position: absolute; 
+            top: 0; left: 0; right: 0; bottom: 0; 
+            border-radius: 12px; 
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+            justify-content: center; 
+            color: white; 
+            font-size: 2rem; 
+            font-weight: bold; 
+            opacity: 0; 
+            pointer-events: none; 
+            transition: opacity 0.2s ease; 
+        }
+        
+        .flash-correct { background: rgba(46, 204, 113, 0.95); opacity: 1; }
+        .flash-wrong { background: rgba(231, 76, 60, 0.95); opacity: 1; }
+    </style>
+</head>
+<body>
+
+    <header class="header-area">
+        <a href="../../index.html" class="back-link">⬅ Back to Desk</a>
+        <h1>Grade Bettor</h1>
+    </header>
+
+    <div class="hud-display">
+        <div>Score: <span id="score-count">0</span></div>
+        <div>Streak: <span id="streak-count">0 🔥</span></div>
+    </div>
+
+    <main class="folder-container">
+        <div id="flash-overlay" class="result-flash"><span id="flash-text">CORRECT</span></div>
+        
+        <div class="profile-row">
+            <div class="avatar-box" id="student-avatar">🧑‍🎓</div>
+            <div class="student-meta">
+                <h2 id="student-name">Loading Student...</h2>
+            </div>
+        </div>
+
+        <div class="dossier-data">
+            <div class="data-line"><span class="label">Test Average:</span> <span class="value" id="stat-test">0%</span></div>
+            <div class="data-line"><span class="label">Lesson Focus:</span> <span class="value" id="stat-work">Unknown</span></div>
+        </div>
+
+        <div class="bet-tray">
+            <button class="btn-bet btn-a" onclick="submitBet('A')">Bet A</button>
+            <button class="btn-bet btn-c" onclick="submitBet('C')">Bet C</button>
+            <button class="btn-bet btn-f" onclick="submitBet('F')">Bet F</button>
+        </div>
+    </main>
+
+    <script>
+        const firstNames = ["Oliver", "Liam", "Ebba", "Maja", "Astrid", "Hugo", "Alice", "Linnea", "Emil"];
+        const lastNames = ["Andersson", "Karlsson", "Nilsson", "Eriksson", "Larsson", "Berg"];
+        let currentStudent = {}; 
+        let score = 0; 
+        let streak = 0;
+
+        function nextStudent() {
+            const name = firstNames[Math.floor(Math.random() * firstNames.length)] + " " + lastNames[Math.floor(Math.random() * lastNames.length)];
+            const rand = Math.random(); 
+            let test, work, grade;
+
+            if (rand > 0.66) { 
+                test = Math.floor(88 + Math.random() * 12) + "%"; 
+                work = "Highly Focused & Quiet"; 
+                grade = "A"; 
+            } else if (rand > 0.33) { 
+                test = Math.floor(65 + Math.random() * 20) + "%"; 
+                work = "Works hard when watched"; 
+                grade = "C"; 
+            } else { 
+                test = Math.floor(15 + Math.random() * 45) + "%"; 
+                work = "Hiding phone behind textbook"; 
+                grade = "F"; 
+            }
+
+            currentStudent = { name, test, work, grade };
+            document.getElementById('student-name').innerText = name;
+            document.getElementById('stat-test').innerText = test;
+            document.getElementById('stat-work').innerText = work;
+        }
+
+        function submitBet(bet) {
+            const overlay = document.getElementById('flash-overlay');
+            if (bet === currentStudent.grade) { 
+                score += 100; 
+                streak++; 
+                overlay.className = "result-flash flash-correct"; 
+                document.getElementById('flash-text').innerText = "🎯 CORRECT"; 
+            } else { 
+                streak = 0; 
+                overlay.className = "result-flash flash-wrong"; 
+                document.getElementById('flash-text').innerText = `❌ WRONG (Was Grade ${currentStudent.grade})`; 
+            }
+            
+            document.getElementById('score-count').innerText = score;
+            document.getElementById('streak-count').innerText = streak + " 🔥";
+            
+            setTimeout(() => { 
+                overlay.className = "result-flash"; 
+                nextStudent(); 
+            }, 1500);
+        }
+
+        nextStudent();
+    </script>
+</body>
+</html>
