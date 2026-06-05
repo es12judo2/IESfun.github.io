@@ -3,14 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Spend Mr. Swart's Money</title>
+    <title>IES Game Hub - Staff Room Dashboard</title>
     <style>
         @import url('https://googleapis.com');
 
         :root {
             --ies-navy: #002F6C;
             --ies-gold: #D4AF37;
-            --money-green: #2ecc71;
+            --desk-wood: #D7C4A5;
             --radius-subtle: 8px;
         }
 
@@ -19,189 +19,209 @@
             padding: 0;
             background-color: #ECE0CD;
             font-family: 'Noto Sans', sans-serif;
-            color: #2C3E50;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
         }
 
-        /* Top sticky cash counter tracking framework */
-        .money-bar {
-            background-color: var(--money-green);
-            color: white;
+        .desk-banner {
+            background-color: var(--ies-navy);
+            color: #FFFFFF;
             text-align: center;
-            padding: 20px;
+            padding: 30px 15px;
+            border-bottom: 5px solid var(--ies-gold);
+            box-shadow: 0 10px 30px rgba(0, 47, 108, 0.25);
+        }
+
+        .desk-banner h1 {
+            font-family: 'Lora', serif;
             font-size: 2.5rem;
-            font-family: 'Lora', serif;
-            font-weight: bold;
-            position: sticky;
-            top: 0;
-            z-index: 100;
-            box-shadow: 0 8px 20px rgba(0,0,0,0.15);
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
-            border-bottom: 4px solid #27ae60;
+            margin: 0 0 5px 0;
         }
 
-        .header-area {
-            text-align: center;
-            padding: 30px;
-            background: var(--ies-navy);
-            color: white;
-            border-bottom: 4px solid var(--ies-gold);
+        .desk-banner p {
+            font-size: 0.95rem;
+            margin: 0;
+            letter-spacing: 1px;
+            opacity: 0.8;
+            text-transform: uppercase;
         }
 
-        .header-area h1 {
+        .desk-surface {
+            max-width: 1200px;
+            margin: 50px auto;
+            padding: 40px;
+            background: radial-gradient(circle at 50% 0%, #E8DCB9 0%, #CEBE9B 100%);
+            border-radius: 16px;
+            border: 3px solid #BAA984;
+            box-shadow: inset 0 4px 10px rgba(0,0,0,0.08), 0 15px 40px rgba(0,0,0,0.12);
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 50px;
+            flex-grow: 1;
+            align-content: center;
+        }
+
+        .desk-item {
+            position: relative;
+            text-decoration: none;
+            color: #2C3E50;
+            cursor: pointer;
+            transition: transform 0.2s cubic-bezier(0.25, 0.8, 0.25, 1);
+        }
+
+        .item-body {
+            background: #FFFFFF;
+            border-radius: var(--radius-subtle);
+            padding: 35px 25px;
+            height: 100%;
+            box-sizing: border-box;
+            position: relative;
+            z-index: 2;
+            border: 1px solid rgba(0,0,0,0.05);
+            box-shadow: 0 1px 1px rgba(0,0,0,0.1), 0 4px 0 #E2E8F0, 0 8px 0 #CBD5E1;
+        }
+
+        .desk-item:hover {
+            transform: translateY(-8px) scale(1.02);
+        }
+
+        .desk-item:hover .item-body {
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1), 0 12px 0 #E2E8F0, 0 16px 20px rgba(0,0,0,0.15);
+        }
+
+        .game-emoji {
+            font-size: 3.5rem;
+            display: block;
+            margin-bottom: 15px;
+            filter: drop-shadow(2px 4px 4px rgba(0,0,0,0.1));
+        }
+
+        .item-content h2 {
             font-family: 'Lora', serif;
+            color: var(--ies-navy);
+            font-size: 1.45rem;
             margin: 0 0 10px 0;
         }
 
-        .back-link {
-            display: inline-block;
-            color: var(--ies-gold);
-            text-decoration: none;
+        .item-content p {
+            font-size: 0.95rem;
+            line-height: 1.5;
+            color: #5A6A85;
+            margin: 0;
+        }
+
+        .clipboard-item .item-body {
+            background-color: #FAF6EE;
+            border-top: 15px solid #795548;
+        }
+
+        .teacher-note {
+            margin-top: 25px;
+            font-size: 0.8rem;
+            color: #A0AEC0;
+            text-transform: uppercase;
             font-weight: bold;
-            margin-bottom: 15px;
+            border-top: 1px dashed #E2E8F0;
+            padding-top: 10px;
         }
 
-        /* 3D Shopping Center Grid */
-        .shopping-grid {
-            max-width: 1100px;
-            margin: 40px auto;
-            padding: 0 20px;
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-            gap: 25px;
+        .ledger-item .item-body {
+            background-color: #F8FAFC;
+            border-left: 20px solid var(--ies-navy);
         }
 
-        /* Item Cards with subtle rounded 3D depth alignment */
-        .item-card {
-            background: white;
-            border-radius: var(--radius-subtle);
-            padding: 20px;
-            text-align: center;
-            box-shadow: 0 1px 1px rgba(0,0,0,0.1), 0 4px 0 #CBD5E1;
-            border: 1px solid rgba(0,0,0,0.05);
-        }
-
-        .item-emoji {
-            font-size: 3rem;
-            margin-bottom: 10px;
-            display: block;
-        }
-
-        .item-name {
+        .budget-stamp {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            border: 2px dashed #E53E3E;
+            color: #E53E3E;
+            padding: 3px 8px;
+            font-size: 0.75rem;
             font-weight: bold;
-            font-size: 1.1rem;
-            margin: 5px 0;
-        }
-
-        .item-price {
-            color: #7F8C8D;
-            font-weight: bold;
-            margin-bottom: 15px;
-        }
-
-        /* Transaction Interface Handles */
-        .btn-group {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 10px;
-            align-items: center;
-        }
-
-        .btn {
-            border: none;
-            padding: 10px;
-            font-weight: bold;
+            transform: rotate(-5deg);
             border-radius: 4px;
-            cursor: pointer;
-            font-size: 0.9rem;
-            color: white;
         }
 
-        .btn-sell { background-color: #e74c3c; box-shadow: 0 3px 0 #c0392b; }
-        .btn-sell:disabled { background-color: #bdc3c7; box-shadow: none; cursor: not-allowed; }
-        .btn-buy { background-color: var(--money-green); box-shadow: 0 3px 0 #27ae60; }
-        .btn-buy:disabled { background-color: #bdc3c7; box-shadow: none; cursor: not-allowed; }
-
-        .btn:active:not(:disabled) {
-            transform: translateY(3px);
-            box-shadow: none;
+        .exam-item .item-body {
+            background-color: #FCFBF9;
+            background-image: linear-gradient(#EBF1F5 1px, transparent 1px);
+            background-size: 100% 24px;
         }
 
-        .item-count {
+        .ink-stain {
+            position: absolute;
+            top: 25px;
+            right: 25px;
+            font-size: 1.8rem;
+            color: #E53E3E;
+            font-family: 'Lora', serif;
             font-weight: bold;
-            font-size: 1.1rem;
-            color: var(--ies-navy);
+            opacity: 0.85;
+        }
+
+        .desk-footer {
+            text-align: center;
+            padding: 20px;
+            background-color: #D3C4AA;
+            color: #5A6A85;
+            font-size: 0.85rem;
+            border-top: 1px solid #C4B498;
         }
     </style>
 </head>
 <body>
 
-    <header class="header-area">
-        <a href="../../index.html" class="back-link">⬅ Back to Desk</a>
-        <h1>Spend Mr. Swart's Money</h1>
-        <p>The school budget proposal terminal is open. Allocate your funds wisely.</p>
+    <header class="desk-banner">
+        <div class="banner-crest">📖</div>
+        <h1>IES Staff Room Simulator</h1>
+        <p>International English School • Teacher Portal Terminal</p>
     </header>
 
-    <!-- Dynamic Live Money Display Tracker -->
-    <div class="money-bar"><span id="balance-display">2,000,000</span> kr</div>
+    <main class="desk-surface">
+        
+        <!-- Game Item 1: Grade Bettor -->
+        <a href="games/grade-betting/index.html" class="desk-item clipboard-item">
+            <div class="item-body">
+                <div class="item-content">
+                    <span class="game-emoji">📈</span>
+                    <h2>Grade Bettor</h2>
+                    <p>Review photo IDs, test scores, and focus histories to bet on final student marks.</p>
+                    <div class="teacher-note">Class 8B Matrix</div>
+                </div>
+            </div>
+        </a>
 
-    <!-- Inventory Matrix Grid -->
-    <main class="shopping-grid" id="catalog-surface"></main>
+        <!-- Game Item 2: Spend Mr. Swart's Money -->
+        <a href="games/spend-money/index.html" class="desk-item ledger-item">
+            <div class="item-body">
+                <div class="item-content">
+                    <span class="game-emoji">💸</span>
+                    <h2>Spend Mr. Swart's Money</h2>
+                    <p>Procure smartboards, coffee, and lab equipment. Exactly 2,000,000 kr budget limit.</p>
+                    <div class="budget-stamp">2,000,000 kr Max</div>
+                </div>
+            </div>
+        </a>
 
-    <script>
-        let currentBalance = 2000000;
+        <!-- Game Item 3: Speed Grader -->
+        <a href="games/test-grader/index.html" class="desk-item exam-item">
+            <div class="item-body">
+                <div class="item-content">
+                    <span class="game-emoji">📝</span>
+                    <h2>Speed Grader</h2>
+                    <p>Mark tests with your red ink. Catch cheaters hiding modern mobile phone frames.</p>
+                    <div class="ink-stain">A+</div>
+                </div>
+            </div>
+        </a>
 
-        // Neal.fun style items array targeting premium school objects
-        const inventoryItems = [
-            { id: "coffee", name: "Staff Room Coffee Machine", price: 12000, emoji: "☕", count: 0 },
-            { id: "smartboard", name: "Interactive Smartboard", price: 35000, emoji: "📺", count: 0 },
-            { id: "textbook", name: "Set of English Textbooks", price: 4500, emoji: "📚", count: 0 },
-            { id: "laptop", name: "Teacher Work Chromebook", price: 6500, emoji: "💻", count: 0 },
-            { id: "desk", name: "Ergonomic Standing Desk", price: 8000, emoji: "🪑", count: 0 },
-            { id: "lab", name: "Advanced Chemistry Set", price: 150000, emoji: "🧪", count: 0 },
-            { id: "bus", name: "School Field Trip Bus Rental", price: 25000, emoji: "🚌", count: 0 },
-            { id: "padel", name: "Padel Court Installation", price: 450000, emoji: "🎾", count: 0 },
-            { id: "goldpen", name: "Principal's Engraved Fountain Pen", price: 3500, emoji: "✒", count: 0 }
-        ];
+    </main>
 
-        function renderCatalog() {
-            const surface = document.getElementById('catalog-surface');
-            surface.innerHTML = '';
+    <footer class="desk-footer">
+        <p>Certified Portal Environment • For Educational Use Only</p>
+    </footer>
 
-            inventoryItems.forEach((item, index) => {
-                const card = document.createElement('div');
-                card.className = 'item-card';
-                card.innerHTML = `
-                    <span class="item-emoji">${item.emoji}</span>
-                    <div class="item-name">${item.name}</div>
-                    <div class="item-price">${item.price.toLocaleString()} kr</div>
-                    <div class="btn-group">
-                        <button class="btn btn-sell" ${item.count === 0 ? 'disabled' : ''} onclick="transact(${index}, 'sell')">Sell</button>
-                        <span class="item-count" id="count-${item.id}">${item.count}</span>
-                        <button class="btn btn-buy" ${currentBalance < item.price ? 'disabled' : ''} onclick="transact(${index}, 'buy')">Buy</button>
-                    </div>
-                `;
-                surface.appendChild(card);
-            });
-        }
-
-        function transact(index, type) {
-            const item = inventoryItems[index];
-
-            if (type === 'buy' && currentBalance >= item.price) {
-                currentBalance -= item.price;
-                item.count++;
-            } else if (type === 'sell' && item.count > 0) {
-                currentBalance += item.price;
-                item.count--;
-            }
-
-            // Update DOM view matrix counters immediately
-            document.getElementById('balance-display').innerText = currentBalance.toLocaleString();
-            renderCatalog();
-        }
-
-        // Initialize display configuration matrices 
-        renderCatalog();
-    </script>
 </body>
 </html>
