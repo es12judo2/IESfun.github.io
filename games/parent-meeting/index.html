@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Parent Meeting Simulator</title>
+    <style>
+        @import url('https://googleapis.com');
+        
+        :root { 
+            --ies-navy: #002F6C; 
+            --ies-gold: #D4AF37; 
+            --radius-subtle: 8px; 
+        }
+        
+        body { 
+            margin: 0; 
+            padding: 0; 
+            background-color: #ECE0CD; 
+            font-family: 'Noto Sans', sans-serif; 
+            color: #2C3E50; 
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+            min-height: 100vh;
+        }
+        
+        .header-area { 
+            width: 100%; 
+            text-align: center; 
+            padding: 30px 0; 
+            background: var(--ies-navy); 
+            color: white; 
+            border-bottom: 4px solid var(--ies-gold); 
+        }
+        
+        .header-area h1 {
+            font-family: 'Lora', serif;
+            margin: 0 0 10px 0;
+        }
+
+        .back-link { 
+            color: var(--ies-gold); 
+            text-decoration: none; 
+            font-weight: bold; 
+            margin-bottom: 10px;
+            display: inline-block;
+        }
+        
+        .hud-display { 
+            background: #FFFFFF; 
+            border-radius: var(--radius-subtle); 
+            padding: 15px 40px; 
+            margin: 25px 0; 
+            font-size: 1.3rem; 
+            font-weight: bold; 
+            display: flex; 
+            flex-direction: column;
+            gap: 10px; 
+            box-shadow: 0 4px 0 #CBD5E1; 
+            width: 90%;
+            max-width: 500px;
+            box-sizing: border-box;
+        }
+
+        .progress-bar-container {
+            background: #BDC3C7;
+            border-radius: 4px;
+            height: 20px;
+            width: 100%;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            background: #E74C3C;
+            height: 100%;
+            width: 20%;
+            transition: width 0.3s ease;
+        }
+        
+        .email-container { 
+            background: #FFFFFF; 
+            width: 90%; 
+            max-width: 500px; 
+            border-radius: 8px; 
+            padding: 25px; 
+            position: relative; 
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1); 
+            box-sizing: border-box;
+            border: 1px solid #E2E8F0;
+        }
+        
+        .email-header {
+            border-bottom: 2px solid #BDC3C7;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+            font-size: 0.95rem;
+            line-height: 1.6;
+        }
+
+        .email-body {
+            font-style: italic;
+            color: #34495E;
+            font-size: 1.1rem;
+            line-height: 1.5;
+            min-height: 100px;
+            font-family: 'Lora', serif;
+        }
+        
+        .option-list { 
+            display: flex;
+            flex-direction: column;
+            gap: 12px; 
+            width: 90%;
+            max-width: 500px;
+            margin-top: 25px;
+            padding-bottom: 40px;
+        }
+        
+        .btn-reply { 
+            border: none; 
+            padding: 15px; 
+            font-size: 1rem; 
+            font-weight: bold; 
+            color: #2C3E50; 
+            background: #FFFFFF;
+            border: 2px solid var(--ies-navy);
+            border-radius: var(--radius-subtle); 
+            cursor: pointer; 
+            text-align: left;
+            box-shadow: 0 3px 0 var(--ies-navy);
+            transition: all 0.1s;
+        }
+        
+        .btn-reply:active {
+            transform: translateY(3px);
+            box-shadow: none;
+        }
+
+        .btn-reply:hover {
+            background: #F4F6F7;
+        }
+    </style>
+</head>
+<body>
+
+    <header class="header-area">
+        <a href="../../index.html" class="back-link">⬅ Back to Desk</a>
+        <h1>Parent Meeting</h1>
+    </header>
+
+    <div class="hud-display">
+        <div style="display:flex; justify-content:space-between;">
+            <div>Emails Defused: <span id="win-count">0</span></div>
+            <div id="stress-title-text">Stress Level</div>
+        </div>
+        <div class="progress-bar-container">
+            <div class="progress-fill" id="stress-meter"></div>
+        </div>
+    </div>
+
+    <main class="email-container">
+        <div class="email-header">
+            <strong>From:</strong> <span id="parent-name">Loading...</span><br>
+            <strong>Subject:</strong> Urgent Grade / School Review
+        </div>
+        <div class="email-body" id="email-text">
+            Loading complaint...
+        </div>
+    </main>
+
+    <div class="option-list" id="options-box">
+        <!-- Generated Dynamically -->
+    </div>
+
+    <script>
+        const parentNames = ["Mrs. Andersson", "Mr. Larsson", "Dr. Berg", "Mrs. Nilsson", "Mr. Eriksson"];
+        
+        const scenarios = [
+            {
+                complaint: "Why did my child get a C on the matrix? They studied for 40 minutes before dinner!",
+                replies: [
+                    { text: "Let's review the rubric criteria together during tutorial time.", stress: -15, correct: true },
+                    { text: "The matrix doesn't lie. Check SchoolSoft records.", stress: 25, correct: false },
+                    { text: "Perhaps they were hiding a phone behind their book?", stress: 15, correct: false }
+                ]
+            },
+            {
+                complaint: "You confiscated my son's phone! That device costs 12,000 kr!",
+                replies: [
+                    { text: "It will be safely stored in the administration office until the end of the day.", stress: -10, correct: true },
+                    { text: "He shouldn't have been using it to cheat on his Shakespeare test.", stress: 20, correct: false },
+                    { text: "I don't make the rules here, please talk to Mr. Swart directly.", stress: 30, correct: false }
+                ]
+            },
+            {
+                complaint: "My daughter claims you spend school funds on espresso machines instead of science equipment!",
+                replies: [
+                    { text: "All school budget allocations are strictly monitored by regional auditors.", stress: -5, correct: true },
+                    { text: "A highly-caffeinated staff room ensures optimal student outcomes.", stress: 35, correct: false },
+                    { text: "Please submit a formal request via the administration terminal portal.", stress: 15, correct: false }
+                ]
+            },
+            {
+                complaint: "My son insists his test average is high enough for an A. Your betting game is insulting!",
+                replies: [
+                    { text: "The system simply simulates internal target tracking metrics securely.", stress: -10, correct: true },
+                    { text: "He needs to work harder when not being watched to secure an A.", stress: 20, correct: false },
+                    { text: "It's just an evaluation tool for Class 8B.", stress: 15, correct: false }
+                ]
+            }
+        ];
+
+        let score = 0;
+        let stress = 20;
+
+        function nextScenario() {
+            if (stress >= 100) {
+                document.getElementById('email-text').innerHTML = "<strong style='color:#E74C3C;'>💥 STRESS MAXED OUT! You packed your bags and left the staff room.</strong>";
+                document.getElementById('stress-title-text').innerText = "BURNT OUT ⚠️";
+                document.getElementById('options-box').innerHTML = `<button class="btn-reply" onclick="location.reload()" style="text-align:center; padding:15px; width:100%;">Try Again</button>`;
+                return;
+            }
+
+            const activeName = parentNames[Math.floor(Math.random() * parentNames.length)];
+            const activeData = scenarios[Math.floor(Math.random() * scenarios.length)];
+            
+            document.getElementById('parent-name').innerText = activeName;
+            document.getElementById('email-text').innerText = `"${activeData.complaint}"`;
+            
+            const optionsBox = document.getElementById('options-box');
+            optionsBox.innerHTML = '';
+
+            // Randomize options array to keep gameplay variable
+            const shuffledReplies = [...activeData.replies].sort(() => Math.random() - 0.5);
+
+            shuffledReplies.forEach(reply => {
+                const button = document.createElement('button');
+                button.className = 'btn-reply';
+                button.innerText = reply.text;
+                button.onclick = () => {
+                    stress = Math.max(0, Math.min(100, stress + reply.stress));
+                    if (reply.correct) score++;
+                    
+                    document.getElementById('win-count').innerText = score;
+                    document.getElementById('stress-meter').style.width = stress + "%";
+                    
+                    nextScenario();
+                };
+                optionsBox.appendChild(button);
+            });
+        }
+
+        // Initialize display configuration frame
+        document.getElementById('stress-meter').style.width = stress + "%";
+        nextScenario();
+    </script>
+</body>
+</html>
