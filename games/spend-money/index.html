@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Spend Mr. Swart's Money</title>
+    <style>
+        @import url('https://googleapis.com');
+        
+        :root { 
+            --ies-navy: #002F6C; 
+            --ies-gold: #D4AF37; 
+            --money-green: #2ecc71; 
+            --radius-subtle: 8px; 
+        }
+        
+        body { 
+            margin: 0; 
+            padding: 0; 
+            background-color: #ECE0CD; 
+            font-family: 'Noto Sans', sans-serif; 
+            color: #2C3E50; 
+        }
+        
+        /* Sticky Top HUD Cash Bar */
+        .money-bar { 
+            background-color: var(--money-green); 
+            color: white; 
+            text-align: center; 
+            padding: 20px; 
+            font-size: 2.5rem; 
+            font-family: 'Lora', serif; 
+            font-weight: bold; 
+            position: sticky; 
+            top: 0; 
+            z-index: 100; 
+            box-shadow: 0 8px 20px rgba(0,0,0,0.15); 
+            border-bottom: 4px solid #27ae60; 
+        }
+        
+        .header-area { 
+            text-align: center; 
+            padding: 30px; 
+            background: var(--ies-navy); 
+            color: white; 
+            border-bottom: 4px solid var(--ies-gold); 
+        }
+        
+        .header-area h1 { 
+            font-family: 'Lora', serif; 
+            margin: 0 0 10px 0; 
+        }
+        
+        .back-link { 
+            color: var(--ies-gold); 
+            text-decoration: none; 
+            font-weight: bold; 
+            margin-bottom: 15px; 
+            display: inline-block; 
+        }
+        
+        /* Shopping Grid Matrix Layout */
+        .shopping-grid { 
+            max-width: 1100px; 
+            margin: 40px auto; 
+            padding: 0 20px; 
+            display: grid; 
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); 
+            gap: 25px; 
+        }
+        
+        /* 3D Neumorphic Pop Item Cards */
+        .item-card { 
+            background: white; 
+            border-radius: var(--radius-subtle); 
+            padding: 20px; 
+            text-align: center; 
+            box-shadow: 0 4px 0 #CBD5E1; 
+            border: 1px solid rgba(0,0,0,0.05); 
+        }
+        
+        .item-emoji { 
+            font-size: 3rem; 
+            margin-bottom: 10px; 
+            display: block; 
+        }
+        
+        .item-name { 
+            font-weight: bold; 
+            font-size: 1.1rem; 
+            margin: 5px 0; 
+        }
+        
+        .item-price { 
+            color: #7F8C8D; 
+            font-weight: bold; 
+            margin-bottom: 15px; 
+        }
+        
+        .btn-group { 
+            display: grid; 
+            grid-template-columns: 1fr 1fr; 
+            gap: 10px; 
+            align-items: center; 
+        }
+        
+        .btn { 
+            border: none; 
+            padding: 10px; 
+            font-weight: bold; 
+            border-radius: 4px; 
+            cursor: pointer; 
+            color: white; 
+            transition: transform 0.1s;
+        }
+        
+        .btn-sell { background-color: #e74c3c; box-shadow: 0 3px 0 #c0392b; }
+        .btn-sell:disabled { background-color: #bdc3c7; box-shadow: none; cursor: not-allowed; }
+        .btn-buy { background-color: var(--money-green); box-shadow: 0 3px 0 #27ae60; }
+        .btn-buy:disabled { background-color: #bdc3c7; box-shadow: none; cursor: not-allowed; }
+        
+        .btn:active:not(:disabled) {
+            transform: translateY(3px);
+            box-shadow: none;
+        }
+
+        .item-count { 
+            font-weight: bold; 
+            color: var(--ies-navy); 
+            font-size: 1.2rem;
+        }
+    </style>
+</head>
+<body>
+
+    <header class="header-area">
+        <a href="../../index.html" class="back-link">⬅ Back to Desk</a>
+        <h1>Spend Mr. Swart's Money</h1>
+        <p>Distribute the school budget allocation limits before the quarter ends.</p>
+    </header>
+
+    <!-- Global Currency Display Counter -->
+    <div class="money-bar"><span id="balance-display">2,000,000</span> kr</div>
+
+    <!-- Active Catalog Layout -->
+    <main class="shopping-grid" id="catalog-surface"></main>
+
+    <script>
+        let currentBalance = 2000000;
+
+        // Custom budget item matrix list 
+        const inventoryItems = [
+            { id: "coffee", name: "Staff Room Coffee Machine", price: 12000, emoji: "☕", count: 0 },
+            { id: "smartboard", name: "Interactive Smartboard", price: 35000, emoji: "📺", count: 0 },
+            { id: "textbook", name: "Set of English Textbooks", price: 4500, emoji: "📚", count: 0 },
+            { id: "laptop", name: "Teacher Work Chromebook", price: 6500, emoji: "💻", count: 0 },
+            { id: "desk", name: "Ergonomic Standing Desk", price: 8000, emoji: "🪑", count: 0 },
+            { id: "lab", name: "Advanced Chemistry Set", price: 150000, emoji: "🧪", count: 0 },
+            { id: "bus", name: "School Field Trip Bus Rental", price: 25000, emoji: "🚌", count: 0 },
+            { id: "padel", name: "Padel Court Installation", price: 450000, emoji: "🎾", count: 0 },
+            { id: "goldpen", name: "Principal's Engraved Fountain Pen", price: 3500, emoji: "✒", count: 0 }
+        ];
+
+        function renderCatalog() {
+            const surface = document.getElementById('catalog-surface');
+            surface.innerHTML = '';
+
+            inventoryItems.forEach((item, index) => {
+                const card = document.createElement('div');
+                card.className = 'item-card';
+                card.innerHTML = `
+                    <span class="item-emoji">${item.emoji}</span>
+                    <div class="item-name">${item.name}</div>
+                    <div class="item-price">${item.price.toLocaleString()} kr</div>
+                    <div class="btn-group">
+                        <button class="btn btn-sell" ${item.count === 0 ? 'disabled' : ''} onclick="transact(${index}, 'sell')">Sell</button>
+                        <span class="item-count">${item.count}</span>
+                        <button class="btn btn-buy" ${currentBalance < item.price ? 'disabled' : ''} onclick="transact(${index}, 'buy')">Buy</button>
+                    </div>
+                `;
+                surface.appendChild(card);
+            });
+        }
+
+        function transact(index, type) {
+            const item = inventoryItems[index];
+
+            if (type === 'buy' && currentBalance >= item.price) {
+                currentBalance -= item.price;
+                item.count++;
+            } else if (type === 'sell' && item.count > 0) {
+                currentBalance += item.price;
+                item.count--;
+            }
+
+            // Sync visual balance nodes 
+            document.getElementById('balance-display').innerText = currentBalance.toLocaleString();
+            renderCatalog();
+        }
+
+        // Initialize script logic frame
+        renderCatalog();
+    </script>
+</body>
+</html>
